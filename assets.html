@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chime — Asset Store</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #111827;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #111827;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    .menu-btn:hover {
+      background-color: #f3f4f6;
+    }
+
+    .menu-btn span {
+      display: block;
+      width: 24px;
+      height: 2.5px;
+      background-color: #111827;
+      border-radius: 2px;
+    }
+
+    /* Sidebar & Overlay */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 24, 39, 0.25);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 190;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 270px;
+      height: 100vh;
+      background-color: #ffffff;
+      border-left: 1px solid #e5e7eb;
+      box-shadow: -8px 0 28px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .sidebar-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    .close-btn:hover {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #4b5563;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 12px 14px;
+      border-radius: 12px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background-color: #f9fafb;
+      color: #111827;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active {
+      color: #111827;
+    }
+
+    .nav-item.active .nav-label {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+
+    .nav-item.active .nav-label::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background-color: #2563eb;
+      border-radius: 999px;
+    }
+
+    .nav-item.premium-link {
+      color: #b45309;
+    }
+
+    .nav-item.premium-link:hover {
+      background-color: #fffbeb;
+      color: #92400e;
+    }
+
+    /* Main Content Area */
+    .main-container {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 96px 20px 120px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    /* Saved Artworks Grid */
+    .artworks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 18px;
+    }
+
+    .artwork-card {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 14px;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    .artwork-card:hover {
+      transform: translateY(-2px);
+      border-color: #2563eb;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.12);
+    }
+
+    .artwork-thumb {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 12px;
+      background-color: #f8fafc;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .artwork-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .artwork-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .artwork-name {
+      font-size: 0.96rem;
+      font-weight: 700;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .artwork-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .mini-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-publish-open {
+      background-color: #2563eb;
+      color: #ffffff;
+      flex: 1;
+    }
+
+    .btn-publish-open:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-delete-art {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    /* Floating Bottom Circular Pencil Button */
+    .fab-pencil {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.2s ease;
+      z-index: 90;
+    }
+
+    .fab-pencil:hover {
+      background-color: #1d4ed8;
+      transform: translateX(-50%) translateY(-2px);
+    }
+
+    /* Fullscreen Drawing Studio Overlay */
+    .studio-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: #f1f5f9;
+      z-index: 300;
+      display: none;
+      flex-direction: column;
+    }
+
+    .studio-overlay.open {
+      display: flex;
+    }
+
+    .studio-topbar {
+      height: 62px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .studio-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #111827;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.15s ease;
+    }
+
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-success {
+      background-color: #10b981;
+      color: #ffffff;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+    }
+
+    /* Studio Workspace */
+    .studio-body {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Left Tools Column */
+    .tools-sidebar {
+      width: 78px;
+      background-color: #ffffff;
+      border-right: 1px solid #e5e7eb;
+      padding: 14px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      overflow-y: auto;
+    }
+
+    .tool-btn {
+      width: 58px;
+      padding: 8px 4px;
+      border-radius: 12px;
+      border: 2px solid transparent;
+      background-color: #f8fafc;
+      color: #374151;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .tool-btn:hover {
+      background-color: #f1f5f9;
+    }
+
+    .tool-btn.active {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .tool-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .brush-size-box {
+      width: 100%;
+      margin-top: 6px;
+      padding-top: 10px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .brush-size-box label {
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #6b7280;
+    }
+
+    .brush-size-box input {
+      width: 54px;
+    }
+
+    /* Center Canvas Stage */
+    .canvas-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      overflow: auto;
+    }
+
+    .board-frame {
+      position: relative;
+      width: 360px;
+      height: 360px;
+      background-color: #ffffff;
+      background-image:
+        linear-gradient(45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f1f5f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+      border-radius: 16px;
+      border: 2px solid #cbd5e1;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+      touch-action: none;
+    }
+
+    .board-frame canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+    }
+
+    #overlay-canvas {
+      pointer-events: none;
+      z-index: 15;
+    }
+
+    /* Right Swatch & Panels */
+    .right-panel {
+      width: 245px;
+      background-color: #ffffff;
+      border-left: 1px solid #e5e7eb;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .panel-label {
+      font-size: 0.76rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #6b7280;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .active-color-preview {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid #cbd5e1;
+    }
+
+    /* 15 Basic Colors + 5 Pluses + 1 Lock Button */
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .swatch-slot {
+      aspect-ratio: 1;
+      border-radius: 9px;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #6b7280;
+      background-color: #f8fafc;
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .swatch-slot:hover {
+      transform: scale(1.06);
+    }
+
+    .swatch-slot.selected {
+      border-color: #111827;
+      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px #2563eb;
+    }
+
+    .swatch-slot.lock-slot {
+      background-color: #fef3c7;
+      border-color: #fcd34d;
+      color: #b45309;
+      grid-column: span 5;
+      aspect-ratio: auto;
+      padding: 8px;
+      font-size: 0.82rem;
+      gap: 6px;
+    }
+
+    /* Layers Drawer */
+    .layers-box {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 10px;
+      background-color: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .layer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 8px;
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .layer-item.active {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .layer-vis-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 24, 39, 0.48);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.22s ease, visibility 0.22s ease;
+      z-index: 400;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 420px;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h2 {
+      font-size: 1.18rem;
+      font-weight: 800;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      outline: none;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 76px;
+    }
+
+    /* Coin Swiper in Publish Modal */
+    .coin-swiper-box {
+      background-color: #f8fafc;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .coin-value-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .coin-badge {
+      background-color: #fef3c7;
+      color: #b45309;
+      border: 1px solid #fde68a;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .coin-slider {
+      width: 100%;
+      accent-color: #2563eb;
+      cursor: pointer;
+    }
+
+    .coin-range-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #6b7280;
+    }
+
+    .publish-preview-thumb {
+      width: 96px;
+      height: 96px;
+      margin: 0 auto;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      background-color: #f8fafc;
+      overflow: hidden;
+    }
+
+    .publish-preview-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background-color: #111827;
+      color: #ffffff;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 600;
+      text-align: center;
+      max-width: 90vw;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 740px) {
+      .studio-body {
+        flex-direction: column;
+      }
+      .tools-sidebar {
+        width: 100%;
+        flex-direction: row;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 8px;
+        justify-content: center;
+      }
+      .right-panel {
+        width: 100%;
+        border-left: none;
+        border-top: 1px solid #e5e7eb;
+        max-height: 210px;
+      }
+      .board-frame {
+        width: 280px;
+        height: 280px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <span class="header-title">Asset Store</span>
+    <button id="open-menu-btn" class="menu-btn" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Sidebar Overlay & Sidebar -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">Chime</span>
+      <button id="close-menu-btn" class="close-btn" aria-label="Close menu">&times;</button>
+    </div>
+
+    <nav>
+      <ul class="nav-list">
+        <li>
+          <a href="homescreen.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z" />
+            </svg>
+            <span class="nav-label">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            <span class="nav-label">Profile</span>
+          </a>
+        </li>
+        <li>
+          <a href="assets.html" class="nav-item active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            <span class="nav-label">Asset Store</span>
+          </a>
+        </li>
+        <li>
+          <a href="premium.html" class="nav-item premium-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span class="nav-label">Membership</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-container">
+    <div id="empty-state" class="empty-state">
+      <p>No artwork show up here, click the create button to start!</p>
+    </div>
+
+    <div id="artworks-grid" class="artworks-grid" style="display: none;"></div>
+  </main>
+
+  <!-- Floating Bottom Circular Pencil Button -->
+  <button id="open-studio-btn" class="fab-pencil" aria-label="Create artwork" title="Create artwork">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 20h9"></path>
+      <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+    </svg>
+  </button>
+
+  <!-- Fullscreen Drawing Board Studio -->
+  <div id="studio-overlay" class="studio-overlay">
+    <div class="studio-topbar">
+      <button type="button" id="close-studio-btn" class="btn btn-secondary">Cancel</button>
+      <span class="studio-title">Asset Drawing Board</span>
+      <button type="button" id="done-drawing-btn" class="btn btn-success">Done</button>
+    </div>
+
+    <div class="studio-body">
+      <!-- Left Tools Column -->
+      <div class="tools-sidebar">
+        <button type="button" class="tool-btn active" data-tool="pencil" title="Pencil">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+          </svg>
+          <span>Pencil</span>
+        </button>
+
+        <button type="button" class="tool-btn" data-tool="eraser" title="Eraser">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 20H7L3 16c-.8-.8-.8-2 0-2.8L13.4 2.8c.8-.8 2-.8 2.8 0L21 7.6c.8.8.8 2 0 2.8L11.4 20"></path>
+          </svg>
+          <span>Eraser</span>
+        </button>
+
+        <button type="button" class="tool-btn" data-tool="lasso" title="Select / Lasso">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3 3">
+            <circle cx="12" cy="11" r="8"></circle>
+            <path d="M12 19c0 2 2 3 4 2" stroke-dasharray="none"></path>
+          </svg>
+          <span>Select/Lasso</span>
+        </button>
+
+        <button type="button" class="tool-btn" data-tool="eyedropper" title="Selector Pencil (Eyedropper)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="m2 22 1-1h3l9-9"></path>
+            <path d="M3 21v-3l9-9"></path>
+            <path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"></path>
+          </svg>
+          <span>Selector Pencil</span>
+        </button>
+
+        <button type="button" class="tool-btn" id="toggle-layers-btn" title="Layers">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span>Layers</span>
+        </button>
+
+        <button type="button" class="tool-btn" id="open-wheel-btn" title="Color Wheel">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <circle cx="12" cy="12" r="4"></circle>
+            <line x1="12" y1="2" x2="12" y2="8"></line>
+            <line x1="12" y1="16" x2="12" y2="22"></line>
+            <line x1="2" y1="12" x2="8" y2="12"></line>
+            <line x1="16" y1="12" x2="22" y2="12"></line>
+          </svg>
+          <span>Color Wheel</span>
+        </button>
+
+        <div class="brush-size-box">
+          <label for="brush-size-slider">Size: <span id="brush-size-label">6</span>px</label>
+          <input type="range" id="brush-size-slider" min="1" max="32" value="6" />
+        </div>
+      </div>
+
+      <!-- Center Drawing Board -->
+      <div class="canvas-stage">
+        <div class="board-frame" id="board-frame">
+          <canvas id="layer-0" width="360" height="360"></canvas>
+          <canvas id="layer-1" width="360" height="360"></canvas>
+          <canvas id="overlay-canvas" width="360" height="360"></canvas>
+        </div>
+        <div style="margin-top: 10px; font-size: 0.78rem; color: #64748b; font-weight: 600;" id="tool-status-hint">
+          Active Tool: Pencil • Layer 1
+        </div>
+      </div>
+
+      <!-- Right Swatch & Layers Panel -->
+      <div class="right-panel">
+        <div>
+          <div class="panel-label">
+            <span>Color Swatch</span>
+            <span class="active-color-preview" id="active-color-preview" style="background-color: #111827;"></span>
+          </div>
+          <div class="swatch-grid" id="swatch-grid"></div>
+        </div>
+
+        <div id="layers-panel-section">
+          <div class="panel-label">
+            <span>Layers</span>
+            <button type="button" id="clear-layer-btn" class="mini-btn btn-secondary" style="padding: 3px 8px; font-size: 0.7rem;">Clear Layer</button>
+          </div>
+          <div class="layers-box" id="layers-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Color Wheel Picker Modal -->
+  <div id="wheel-modal" class="modal-overlay">
+    <div class="modal-card" style="max-width: 320px; align-items: center; text-align: center;">
+      <div class="modal-header" style="width: 100%;">
+        <h2>Color Wheel</h2>
+        <button type="button" id="close-wheel-modal" class="modal-close">&times;</button>
+      </div>
+      <canvas id="color-wheel-canvas" width="210" height="210" style="border-radius: 50%; cursor: crosshair; box-shadow: 0 4px 16px rgba(0,0,0,0.12);"></canvas>
+      <div style="display: flex; align-items: center; gap: 10px; width: 100%; justify-content: center;">
+        <span id="wheel-selected-box" style="width: 34px; height: 34px; border-radius: 8px; border: 1px solid #cbd5e1; background-color: #2563eb;"></span>
+        <span id="wheel-hex-text" style="font-weight: 700; font-size: 0.9rem;">#2563EB</span>
+      </div>
+      <button type="button" id="apply-wheel-color-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">Use Color</button>
+    </div>
+  </div>
+
+  <!-- Name Drawing Modal (After clicking Done) -->
+  <div id="save-name-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Name Your Drawing</h2>
+        <button type="button" id="close-save-name-modal" class="modal-close">&times;</button>
+      </div>
+      <div class="form-group">
+        <label for="drawing-name-input">Asset Name</label>
+        <input type="text" id="drawing-name-input" maxlength="40" placeholder="Enter drawing name..." />
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" id="cancel-save-name-btn" class="btn btn-secondary">Back</button>
+        <button type="button" id="confirm-save-cloud-btn" class="btn btn-primary">Save to Cloud</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Publish Asset Modal (With Coin Swiper 25 - 450) -->
+  <div id="publish-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Publish Asset</h2>
+        <button type="button" id="close-publish-modal" class="modal-close">&times;</button>
+      </div>
+
+      <div class="publish-preview-thumb">
+        <img id="publish-preview-img" src="" alt="Asset Preview" />
+      </div>
+
+      <div class="coin-swiper-box">
+        <div class="coin-value-header">
+          <span style="font-size: 0.84rem; font-weight: 700; color: #374151;">Price Swiper</span>
+          <span class="coin-badge" id="coin-value-display">25 Coin</span>
+        </div>
+        <input type="range" id="coin-swiper" class="coin-slider" min="25" max="450" step="5" value="25" />
+        <div class="coin-range-labels">
+          <span>25 Coin</span>
+          <span>450 Coin</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="publish-asset-name">Asset Name</label>
+        <input type="text" id="publish-asset-name" maxlength="40" placeholder="Name your asset..." />
+      </div>
+
+      <div class="form-group">
+        <label for="publish-asset-desc">Description</label>
+        <textarea id="publish-asset-desc" maxlength="200" placeholder="Add a description for your asset..."></textarea>
+      </div>
+
+      <button type="button" id="submit-publish-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">Publish</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    // --- Navigation Sidebar ---
+    const openMenuBtn = document.getElementById('open-menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    openMenuBtn.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+      sidebar.setAttribute('aria-hidden', 'false');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+      sidebar.setAttribute('aria-hidden', 'true');
+    }
+
+    closeMenuBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // --- Toast Helper ---
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, 3200);
+    }
+
+    // --- Cloud Storage for Saved Artworks ---
+    const CLOUD_ASSETS_KEY = 'chime_cloud_artworks_v1';
+
+    function loadCloudArtworks() {
+      try {
+        return JSON.parse(localStorage.getItem(CLOUD_ASSETS_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveCloudArtworks(list) {
+      localStorage.setItem(CLOUD_ASSETS_KEY, JSON.stringify(list));
+    }
+
+    const emptyState = document.getElementById('empty-state');
+    const artworksGrid = document.getElementById('artworks-grid');
+
+    function renderArtworksGallery() {
+      const artworks = loadCloudArtworks();
+      if (artworks.length === 0) {
+        emptyState.style.display = 'flex';
+        artworksGrid.style.display = 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      artworksGrid.style.display = 'grid';
+      artworksGrid.innerHTML = '';
+
+      artworks.forEach((art) => {
+        const card = document.createElement('div');
+        card.className = 'artwork-card';
+        card.innerHTML = `
+          <div class="artwork-thumb">
+            <img src="${art.dataUrl}" alt="${escapeHtml(art.name)}" />
+          </div>
+          <div class="artwork-meta">
+            <span class="artwork-name">${escapeHtml(art.name)}</span>
+          </div>
+          <div class="artwork-actions">
+            <button type="button" class="mini-btn btn-publish-open">Publish</button>
+            <button type="button" class="mini-btn btn-delete-art">Delete</button>
+          </div>
+        `;
+
+        card.querySelector('.artwork-thumb').addEventListener('click', () => openPublishModal(art));
+        card.querySelector('.btn-publish-open').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPublishModal(art);
+        });
+
+        card.querySelector('.btn-delete-art').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const updated = loadCloudArtworks().filter((item) => item.id !== art.id);
+          saveCloudArtworks(updated);
+          renderArtworksGallery();
+          showToast('Artwork removed');
+        });
+
+        artworksGrid.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // --- Swatch System: 15 Basic Colors + 5 Custom Pluses + 1 Lock Button ---
+    const BASIC_COLORS = [
+      '#111827', '#ffffff', '#ef4444', '#f97316', '#facc15',
+      '#22c55e', '#10b981', '#06b6d4', '#3b82f6', '#6366f1',
+      '#a855f7', '#ec4899', '#854d0e', '#94a3b8', '#fde047'
+    ];
+
+    let customColors = [null, null, null, null, null];
+    let activeCustomSlotIndex = null;
+    let currentColor = '#111827';
+
+    const swatchGrid = document.getElementById('swatch-grid');
+    const activeColorPreview = document.getElementById('active-color-preview');
+
+    function setActiveColor(hex) {
+      currentColor = hex;
+      activeColorPreview.style.backgroundColor = hex;
+      renderSwatches();
+    }
+
+    function renderSwatches() {
+      swatchGrid.innerHTML = '';
+
+      // 15 Basic Colors
+      BASIC_COLORS.forEach((color) => {
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        slot.className = 'swatch-slot' + (currentColor.toLowerCase() === color.toLowerCase() ? ' selected' : '');
+        slot.style.backgroundColor = color;
+        slot.title = color;
+        slot.addEventListener('click', () => {
+          activeCustomSlotIndex = null;
+          setActiveColor(color);
+        });
+        swatchGrid.appendChild(slot);
+      });
+
+      // 5 Custom Pluses
+      customColors.forEach((customHex, idx) => {
+        const slot = document.createElement('button');
+        slot.type = 'button';
+        if (customHex) {
+          slot.className = 'swatch-slot' + (currentColor.toLowerCase() === customHex.toLowerCase() ? ' selected' : '');
+          slot.style.backgroundColor = customHex;
+          slot.title = `Custom Slot ${idx + 1}: ${customHex}`;
+          slot.addEventListener('click', () => {
+            activeCustomSlotIndex = idx;
+            setActiveColor(customHex);
+          });
+        } else {
+          slot.className = 'swatch-slot';
+          slot.textContent = '+';
+          slot.title = 'Add custom color';
+          slot.addEventListener('click', () => {
+            activeCustomSlotIndex = idx;
+            openColorWheelModal();
+          });
+        }
+        swatchGrid.appendChild(slot);
+      });
+
+      // Lock Button
+      const lockSlot = document.createElement('button');
+      lockSlot.type = 'button';
+      lockSlot.className = 'swatch-slot lock-slot';
+      lockSlot.innerHTML = '🔒 Lock';
+      lockSlot.addEventListener('click', () => {
+        showToast('You cannot add more custom colors right now');
+      });
+      swatchGrid.appendChild(lockSlot);
+    }
+
+    // --- Color Wheel Modal ---
+    const wheelModal = document.getElementById('wheel-modal');
+    const closeWheelModal = document.getElementById('close-wheel-modal');
+    const openWheelBtn = document.getElementById('open-wheel-btn');
+    const wheelCanvas = document.getElementById('color-wheel-canvas');
+    const wheelCtx = wheelCanvas.getContext('2d');
+    const wheelSelectedBox = document.getElementById('wheel-selected-box');
+    const wheelHexText = document.getElementById('wheel-hex-text');
+    const applyWheelColorBtn = document.getElementById('apply-wheel-color-btn');
+
+    let tempWheelColor = '#2563eb';
+
+    function drawColorWheel() {
+      const radius = wheelCanvas.width / 2;
+      for (let angle = 0; angle < 360; angle++) {
+        const startAngle = ((angle - 2) * Math.PI) / 180;
+        const endAngle = ((angle + 2) * Math.PI) / 180;
+        const grad = wheelCtx.createRadialGradient(radius, radius, 0, radius, radius, radius);
+        grad.addColorStop(0, '#ffffff');
+        grad.addColorStop(0.55, `hsl(${angle}, 100%, 50%)`);
+        grad.addColorStop(1, `hsl(${angle}, 100%, 25%)`);
+
+        wheelCtx.beginPath();
+        wheelCtx.moveTo(radius, radius);
+        wheelCtx.arc(radius, radius, radius, startAngle, endAngle);
+        wheelCtx.closePath();
+        wheelCtx.fillStyle = grad;
+        wheelCtx.fill();
+      }
+    }
+
+    function openColorWheelModal() {
+      drawColorWheel();
+      tempWheelColor = currentColor;
+      wheelSelectedBox.style.backgroundColor = tempWheelColor;
+      wheelHexText.textContent = tempWheelColor.toUpperCase();
+      wheelModal.classList.add('open');
+    }
+
+    openWheelBtn.addEventListener('click', () => {
+      activeCustomSlotIndex = null;
+      openColorWheelModal();
+    });
+
+    closeWheelModal.addEventListener('click', () => {
+      wheelModal.classList.remove('open');
+    });
+
+    wheelCanvas.addEventListener('click', (e) => {
+      const rect = wheelCanvas.getBoundingClientRect();
+      const x = Math.floor(e.clientX - rect.left);
+      const y = Math.floor(e.clientY - rect.top);
+      const pixel = wheelCtx.getImageData(x, y, 1, 1).data;
+      if (pixel[3] === 0) return;
+      const hex = '#' + [pixel[0], pixel[1], pixel[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
+      tempWheelColor = hex;
+      wheelSelectedBox.style.backgroundColor = hex;
+      wheelHexText.textContent = hex.toUpperCase();
+    });
+
+    applyWheelColorBtn.addEventListener('click', () => {
+      if (activeCustomSlotIndex !== null) {
+        customColors[activeCustomSlotIndex] = tempWheelColor;
+      }
+      setActiveColor(tempWheelColor);
+      wheelModal.classList.remove('open');
+    });
+
+    // --- Drawing Board, Tools & Layers ---
+    const studioOverlay = document.getElementById('studio-overlay');
+    const openStudioBtn = document.getElementById('open-studio-btn');
+    const closeStudioBtn = document.getElementById('close-studio-btn');
+    const doneDrawingBtn = document.getElementById('done-drawing-btn');
+
+    const layerCanvases = [
+      document.getElementById('layer-0'),
+      document.getElementById('layer-1')
+    ];
+    const layerCtxs = layerCanvases.map((c) => c.getContext('2d'));
+    const overlayCanvas = document.getElementById('overlay-canvas');
+    const overlayCtx = overlayCanvas.getContext('2d');
+    const boardFrame = document.getElementById('board-frame');
+
+    let layersMeta = [
+      { id: 0, name: 'Layer 1', visible: true },
+      { id: 1, name: 'Layer 2', visible: true }
+    ];
+    let activeLayerIndex = 0;
+    let activeTool = 'pencil';
+    let brushSize = 6;
+    let isPointerDown = false;
+    let lastPt = null;
+    let lassoPoints = [];
+
+    const toolButtons = document.querySelectorAll('.tool-btn[data-tool]');
+    const brushSizeSlider = document.getElementById('brush-size-slider');
+    const brushSizeLabel = document.getElementById('brush-size-label');
+    const toolStatusHint = document.getElementById('tool-status-hint');
+    const layersListEl = document.getElementById('layers-list');
+    const toggleLayersBtn = document.getElementById('toggle-layers-btn');
+    const layersPanelSection = document.getElementById('layers-panel-section');
+    const clearLayerBtn = document.getElementById('clear-layer-btn');
+
+    function updateStatusHint() {
+      const toolNames = {
+        pencil: 'Pencil',
+        eraser: 'Eraser',
+        lasso: 'Select/Lasso',
+        eyedropper: 'Selector Pencil'
+      };
+      toolStatusHint.textContent = `Active Tool: ${toolNames[activeTool] || 'Pencil'} • ${layersMeta[activeLayerIndex].name}`;
+    }
+
+    function renderLayersUI() {
+      layersListEl.innerHTML = '';
+      // Display top layer first
+      [...layersMeta].reverse().forEach((layer) => {
+        const row = document.createElement('div');
+        row.className = 'layer-item' + (layer.id === activeLayerIndex ? ' active' : '');
+        row.innerHTML = `
+          <span>${layer.name}</span>
+          <button type="button" class="layer-vis-btn" title="Toggle visibility">${layer.visible ? '👁️' : '🙈'}</button>
+        `;
+        row.addEventListener('click', () => {
+          activeLayerIndex = layer.id;
+          renderLayersUI();
+          updateStatusHint();
+        });
+        row.querySelector('.layer-vis-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          layer.visible = !layer.visible;
+          layerCanvases[layer.id].style.display = layer.visible ? 'block' : 'none';
+          renderLayersUI();
+        });
+        layersListEl.appendChild(row);
+      });
+    }
+
+    toggleLayersBtn.addEventListener('click', () => {
+      layersPanelSection.style.display = layersPanelSection.style.display === 'none' ? 'block' : 'none';
+    });
+
+    clearLayerBtn.addEventListener('click', () => {
+      layerCtxs[activeLayerIndex].clearRect(0, 0, 360, 360);
+      overlayCtx.clearRect(0, 0, 360, 360);
+      showToast(`${layersMeta[activeLayerIndex].name} cleared`);
+    });
+
+    toolButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        toolButtons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeTool = btn.dataset.tool;
+        overlayCtx.clearRect(0, 0, 360, 360);
+        lassoPoints = [];
+        updateStatusHint();
+      });
+    });
+
+    brushSizeSlider.addEventListener('input', (e) => {
+      brushSize = parseInt(e.target.value, 10);
+      brushSizeLabel.textContent = brushSize;
+    });
+
+    function resetDrawingBoard() {
+      layerCtxs.forEach((ctx) => ctx.clearRect(0, 0, 360, 360));
+      overlayCtx.clearRect(0, 0, 360, 360);
+      layersMeta = [
+        { id: 0, name: 'Layer 1', visible: true },
+        { id: 1, name: 'Layer 2', visible: true }
+      ];
+      layerCanvases.forEach((c) => (c.style.display = 'block'));
+      activeLayerIndex = 0;
+      activeTool = 'pencil';
+      toolButtons.forEach((b) => b.classList.toggle('active', b.dataset.tool === 'pencil'));
+      renderSwatches();
+      renderLayersUI();
+      updateStatusHint();
+    }
+
+    openStudioBtn.addEventListener('click', () => {
+      resetDrawingBoard();
+      studioOverlay.classList.add('open');
+    });
+
+    closeStudioBtn.addEventListener('click', () => {
+      studioOverlay.classList.remove('open');
+    });
+
+    function getCanvasCoords(e) {
+      const rect = boardFrame.getBoundingClientRect();
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return {
+        x: ((clientX - rect.left) / rect.width) * 360,
+        y: ((clientY - rect.top) / rect.height) * 360
+      };
+    }
+
+    function pickColorAt(x, y) {
+      const px = Math.max(0, Math.min(359, Math.floor(x)));
+      const py = Math.max(0, Math.min(359, Math.floor(y)));
+      // Check from top visible layer down
+      for (let i = layerCanvases.length - 1; i >= 0; i--) {
+        if (!layersMeta[i].visible) continue;
+        const data = layerCtxs[i].getImageData(px, py, 1, 1).data;
+        if (data[3] > 0) {
+          const hex = '#' + [data[0], data[1], data[2]].map((v) => v.toString(16).padStart(2, '0')).join('');
+          setActiveColor(hex);
+          showToast(`Selected color ${hex.toUpperCase()}`);
+          return;
+        }
+      }
+      showToast('No color on that spot');
+    }
+
+    function startStroke(e) {
+      e.preventDefault();
+      isPointerDown = true;
+      const pt = getCanvasCoords(e);
+      lastPt = pt;
+
+      if (activeTool === 'eyedropper') {
+        pickColorAt(pt.x, pt.y);
+        isPointerDown = false;
+        return;
+      }
+
+      if (activeTool === 'lasso') {
+        lassoPoints = [pt];
+        overlayCtx.clearRect(0, 0, 360, 360);
+        return;
+      }
+
+      const ctx = layerCtxs[activeLayerIndex];
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.lineWidth = brushSize;
+
+      if (activeTool === 'eraser') {
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.strokeStyle = 'rgba(0,0,0,1)';
+      } else {
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.strokeStyle = currentColor;
+      }
+
+      ctx.beginPath();
+      ctx.moveTo(pt.x, pt.y);
+      ctx.lineTo(pt.x + 0.1, pt.y + 0.1);
+      ctx.stroke();
+    }
+
+    function moveStroke(e) {
+      if (!isPointerDown) return;
+      e.preventDefault();
+      const pt = getCanvasCoords(e);
+
+      if (activeTool === 'lasso') {
+        lassoPoints.push(pt);
+        overlayCtx.clearRect(0, 0, 360, 360);
+        overlayCtx.save();
+        overlayCtx.strokeStyle = '#2563eb';
+        overlayCtx.lineWidth = 2;
+        overlayCtx.setLineDash([5, 5]);
+        overlayCtx.beginPath();
+        lassoPoints.forEach((p, idx) => {
+          if (idx === 0) overlayCtx.moveTo(p.x, p.y);
+          else overlayCtx.lineTo(p.x, p.y);
+        });
+        overlayCtx.stroke();
+        overlayCtx.restore();
+        return;
+      }
+
+      const ctx = layerCtxs[activeLayerIndex];
+      ctx.beginPath();
+      ctx.moveTo(lastPt.x, lastPt.y);
+      ctx.lineTo(pt.x, pt.y);
+      ctx.stroke();
+      lastPt = pt;
+    }
+
+    function endStroke() {
+      if (!isPointerDown) return;
+      isPointerDown = false;
+
+      if (activeTool === 'lasso' && lassoPoints.length > 2) {
+        overlayCtx.save();
+        overlayCtx.strokeStyle = '#2563eb';
+        overlayCtx.fillStyle = 'rgba(37, 99, 235, 0.12)';
+        overlayCtx.lineWidth = 2;
+        overlayCtx.setLineDash([5, 5]);
+        overlayCtx.beginPath();
+        lassoPoints.forEach((p, idx) => {
+          if (idx === 0) overlayCtx.moveTo(p.x, p.y);
+          else overlayCtx.lineTo(p.x, p.y);
+        });
+        overlayCtx.closePath();
+        overlayCtx.fill();
+        overlayCtx.stroke();
+        overlayCtx.restore();
+        showToast('Area selected with Lasso');
+      }
+    }
+
+    boardFrame.addEventListener('mousedown', startStroke);
+    window.addEventListener('mousemove', moveStroke);
+    window.addEventListener('mouseup', endStroke);
+
+    boardFrame.addEventListener('touchstart', startStroke, { passive: false });
+    window.addEventListener('touchmove', moveStroke, { passive: false });
+    window.addEventListener('touchend', endStroke);
+
+    // --- Done -> Name Drawing -> Save to Cloud ---
+    const saveNameModal = document.getElementById('save-name-modal');
+    const closeSaveNameModal = document.getElementById('close-save-name-modal');
+    const cancelSaveNameBtn = document.getElementById('cancel-save-name-btn');
+    const drawingNameInput = document.getElementById('drawing-name-input');
+    const confirmSaveCloudBtn = document.getElementById('confirm-save-cloud-btn');
+
+    function mergeVisibleLayersToDataUrl() {
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = 360;
+      exportCanvas.height = 360;
+      const eCtx = exportCanvas.getContext('2d');
+      layersMeta.forEach((layer) => {
+        if (layer.visible) {
+          eCtx.drawImage(layerCanvases[layer.id], 0, 0);
+        }
+      });
+      return exportCanvas.toDataURL('image/png');
+    }
+
+    doneDrawingBtn.addEventListener('click', () => {
+      drawingNameInput.value = '';
+      saveNameModal.classList.add('open');
+      drawingNameInput.focus();
+    });
+
+    closeSaveNameModal.addEventListener('click', () => saveNameModal.classList.remove('open'));
+    cancelSaveNameBtn.addEventListener('click', () => saveNameModal.classList.remove('open'));
+
+    confirmSaveCloudBtn.addEventListener('click', () => {
+      const name = drawingNameInput.value.trim() || 'Untitled Artwork';
+      const dataUrl = mergeVisibleLayersToDataUrl();
+
+      const artworks = loadCloudArtworks();
+      artworks.unshift({
+        id: 'art_' + Date.now(),
+        name,
+        description: '',
+        dataUrl,
+        createdAt: Date.now()
+      });
+
+      saveCloudArtworks(artworks);
+      saveNameModal.classList.remove('open');
+      studioOverlay.classList.remove('open');
+      renderArtworksGallery();
+      showToast(`"${name}" saved to cloud!`);
+    });
+
+    // --- Publish Modal with Coin Swiper (25 Coin to 450 Coin) ---
+    const publishModal = document.getElementById('publish-modal');
+    const closePublishModal = document.getElementById('close-publish-modal');
+    const publishPreviewImg = document.getElementById('publish-preview-img');
+    const coinSwiper = document.getElementById('coin-swiper');
+    const coinValueDisplay = document.getElementById('coin-value-display');
+    const publishAssetNameInput = document.getElementById('publish-asset-name');
+    const publishAssetDescInput = document.getElementById('publish-asset-desc');
+    const submitPublishBtn = document.getElementById('submit-publish-btn');
+
+    let selectedPublishAsset = null;
+
+    function openPublishModal(art) {
+      selectedPublishAsset = art;
+      publishPreviewImg.src = art.dataUrl;
+      publishAssetNameInput.value = art.name || '';
+      publishAssetDescInput.value = art.description || '';
+      coinSwiper.value = 25;
+      coinValueDisplay.textContent = '25 Coin';
+      publishModal.classList.add('open');
+    }
+
+    closePublishModal.addEventListener('click', () => {
+      publishModal.classList.remove('open');
+    });
+
+    publishModal.addEventListener('click', (e) => {
+      if (e.target === publishModal) {
+        publishModal.classList.remove('open');
+      }
+    });
+
+    coinSwiper.addEventListener('input', (e) => {
+      coinValueDisplay.textContent = `${e.target.value} Coin`;
+    });
+
+    submitPublishBtn.addEventListener('click', () => {
+      if (selectedPublishAsset) {
+        const updatedName = publishAssetNameInput.value.trim() || selectedPublishAsset.name;
+        const updatedDesc = publishAssetDescInput.value.trim();
+        const artworks = loadCloudArtworks();
+        const idx = artworks.findIndex((a) => a.id === selectedPublishAsset.id);
+        if (idx !== -1) {
+          artworks[idx].name = updatedName;
+          artworks[idx].description = updatedDesc;
+          saveCloudArtworks(artworks);
+          renderArtworksGallery();
+        }
+      }
+
+      publishModal.classList.remove('open');
+      showToast('No publish available in this patch. You can still keep this artwork.');
+    });
+
+    // Initialize
+    renderSwatches();
+    renderArtworksGallery();
+  </script>
+
+</body>
+</html>
+

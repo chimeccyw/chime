@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chime — Membership</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: #f8fafc;
+      color: #111827;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 68px;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid #e5e7eb;
+      z-index: 100;
+    }
+
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #111827;
+    }
+
+    .menu-btn {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.2s ease;
+    }
+
+    .menu-btn:hover {
+      background-color: #f3f4f6;
+    }
+
+    .menu-btn span {
+      display: block;
+      width: 24px;
+      height: 2.5px;
+      background-color: #111827;
+      border-radius: 2px;
+    }
+
+    /* Sidebar & Overlay */
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 24, 39, 0.25);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      z-index: 190;
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 270px;
+      height: 100vh;
+      background-color: #ffffff;
+      border-left: 1px solid #e5e7eb;
+      box-shadow: -8px 0 28px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      transform: translateX(100%);
+      transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 36px;
+    }
+
+    .sidebar-brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .close-btn {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      line-height: 1;
+      color: #6b7280;
+      cursor: pointer;
+      padding: 6px 10px;
+      border-radius: 8px;
+    }
+
+    .close-btn:hover {
+      background-color: #f3f4f6;
+      color: #111827;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      color: #4b5563;
+      font-size: 1.05rem;
+      font-weight: 600;
+      padding: 12px 14px;
+      border-radius: 12px;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .nav-item:hover {
+      background-color: #f9fafb;
+      color: #111827;
+    }
+
+    .nav-item svg {
+      width: 22px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .nav-item.active {
+      color: #111827;
+    }
+
+    .nav-item.active .nav-label {
+      position: relative;
+      display: inline-block;
+      padding-bottom: 6px;
+    }
+
+    .nav-item.active .nav-label::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 4px;
+      background-color: #2563eb;
+      border-radius: 999px;
+    }
+
+    .nav-item.premium-link {
+      color: #b45309;
+    }
+
+    .nav-item.premium-link:hover {
+      background-color: #fffbeb;
+      color: #92400e;
+    }
+
+    /* Main Container */
+    .premium-container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 96px 20px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .hero-banner {
+      background: linear-gradient(135deg, #2563eb, #1e40af);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(37, 99, 235, 0.22);
+    }
+
+    .hero-banner h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    .hero-banner p {
+      font-size: 0.98rem;
+      opacity: 0.9;
+      max-width: 480px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    /* Status Card */
+    .status-card {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 22px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+    }
+
+    .status-info h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .status-info span {
+      font-size: 0.82rem;
+      color: #6b7280;
+    }
+
+    .status-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .status-badge.inactive {
+      background-color: #f3f4f6;
+      color: #4b5563;
+      border: 1px solid #e5e7eb;
+    }
+
+    .status-badge.active {
+      background-color: #dcfce7;
+      color: #166534;
+      border: 1px solid #bbf7d0;
+    }
+
+    /* Pricing Plans */
+    .plans-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .plan-card {
+      background-color: #ffffff;
+      border: 2px solid #e5e7eb;
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+      position: relative;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .plan-card:hover {
+      border-color: #cbd5e1;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .plan-card.featured {
+      border-color: #2563eb;
+      background: linear-gradient(to bottom, #ffffff, #f8fafc);
+    }
+
+    .featured-tag {
+      position: absolute;
+      top: -12px;
+      right: 20px;
+      background-color: #2563eb;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .plan-header h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .plan-price {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #2563eb;
+      margin-bottom: 16px;
+    }
+
+    .plan-price span {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #6b7280;
+    }
+
+    .plan-features {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    .plan-features li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.9rem;
+      color: #374151;
+      font-weight: 500;
+    }
+
+    .plan-features li svg {
+      width: 16px;
+      height: 16px;
+      color: #16a34a;
+      flex-shrink: 0;
+    }
+
+    .btn-plan {
+      width: 100%;
+      background-color: #2563eb;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-plan:hover {
+      background-color: #1d4ed8;
+    }
+
+    .btn-plan:active {
+      transform: scale(0.98);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="top-bar">
+    <span class="header-title">Chime</span>
+    <button id="open-menu-btn" class="menu-btn" aria-label="Open menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </header>
+
+  <!-- Sidebar Overlay & Sidebar -->
+  <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+  <aside id="sidebar" class="sidebar" aria-hidden="true">
+    <div class="sidebar-header">
+      <span class="sidebar-brand">Chime</span>
+      <button id="close-menu-btn" class="close-btn" aria-label="Close menu">&times;</button>
+    </div>
+
+    <nav>
+      <ul class="nav-list">
+        <li>
+          <a href="homescreen.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z" />
+            </svg>
+            <span class="nav-label">Home</span>
+          </a>
+        </li>
+        <li>
+          <a href="profile.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+            <span class="nav-label">Profile</span>
+          </a>
+        </li>
+        <li>
+          <a href="assets.html" class="nav-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <path d="M16 10a4 4 0 0 1-8 0" />
+            </svg>
+            <span class="nav-label">Asset Store</span>
+          </a>
+        </li>
+        <li>
+          <a href="premium.html" class="nav-item premium-link active">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span class="nav-label">Membership</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="premium-container">
+    <div class="hero-banner">
+      <h1>Chime Membership</h1>
+      <p>Unlock exclusive perks, 25×25 world grids, profile badges, and special creator features.</p>
+    </div>
+
+    <div class="status-card">
+      <div class="status-info">
+        <h3>Current Status</h3>
+        <span id="status-desc">Free Member</span>
+      </div>
+      <div id="status-badge" class="status-badge inactive">Inactive</div>
+    </div>
+
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-header">
+          <h3>Monthly Pass</h3>
+          <div class="plan-price">$4.99 <span>/ month</span></div>
+          <ul class="plan-features">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Exclusive Membership Profile Badge ⭐
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Unlock 25×25 World Grid Editor
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Priority Support & Updates
+            </li>
+          </ul>
+        </div>
+        <button type="button" class="btn-plan" id="activate-monthly-btn">Activate Membership</button>
+      </div>
+
+      <div class="plan-card featured">
+        <div class="featured-tag">Best Value</div>
+        <div class="plan-header">
+          <h3>Annual Pass</h3>
+          <div class="plan-price">$39.99 <span>/ year</span></div>
+          <ul class="plan-features">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              All Monthly Membership Perks
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Save 33% Annually
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Early Access to New Studio Tools
+            </li>
+          </ul>
+        </div>
+        <button type="button" class="btn-plan" id="activate-yearly-btn">Activate Annual Pass</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const openMenuBtn = document.getElementById('open-menu-btn');
+    const closeMenuBtn = document.getElementById('close-menu-btn');
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    function openSidebar() {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+      sidebar.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+      sidebar.setAttribute('aria-hidden', 'true');
+    }
+
+    openMenuBtn.addEventListener('click', openSidebar);
+    closeMenuBtn.addEventListener('click', closeSidebar);
+    overlay.addEventListener('click', closeSidebar);
+
+    // --- Membership State Storage ---
+    const PREMIUM_STORAGE_KEY = 'chime_premium_status_v3';
+    const statusDesc = document.getElementById('status-desc');
+    const statusBadge = document.getElementById('status-badge');
+    const activateMonthlyBtn = document.getElementById('activate-monthly-btn');
+    const activateYearlyBtn = document.getElementById('activate-yearly-btn');
+
+    function checkMembership() {
+      try {
+        const prem = JSON.parse(localStorage.getItem(PREMIUM_STORAGE_KEY));
+        if (!prem || !prem.active) return false;
+        if (prem.expiresAt && Date.now() > prem.expiresAt) return false;
+        return prem;
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function renderMembershipStatus() {
+      const prem = checkMembership();
+      if (prem) {
+        statusBadge.textContent = 'Active';
+        statusBadge.className = 'status-badge active';
+        const expDate = new Date(prem.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        statusDesc.textContent = `Active Plan (${prem.type === 'yearly' ? 'Annual' : 'Monthly'}) — Renews / Expires on ${expDate}`;
+        activateMonthlyBtn.textContent = 'Extend Membership';
+        activateYearlyBtn.textContent = 'Extend Annual Pass';
+      } else {
+        statusBadge.textContent = 'Inactive';
+        statusBadge.className = 'status-badge inactive';
+        statusDesc.textContent = 'Free Member (Upgrade to unlock exclusive perks)';
+        activateMonthlyBtn.textContent = 'Activate Membership';
+        activateYearlyBtn.textContent = 'Activate Annual Pass';
+      }
+    }
+
+    function activatePlan(type, durationMs) {
+      const expiresAt = Date.now() + durationMs;
+      const payload = { active: true, type, expiresAt };
+      localStorage.setItem(PREMIUM_STORAGE_KEY, JSON.stringify(payload));
+      renderMembershipStatus();
+      alert(`Membership activated successfully! Enjoy your 25×25 grid and profile badge perks.`);
+    }
+
+    activateMonthlyBtn.addEventListener('click', () => {
+      // 30 days
+      activatePlan('monthly', 30 * 24 * 60 * 60 * 1000);
+    });
+
+    activateYearlyBtn.addEventListener('click', () => {
+      // 365 days
+      activatePlan('yearly', 365 * 24 * 60 * 60 * 1000);
+    });
+
+    renderMembershipStatus();
+  </script>
+
+</body>
+</html>
+

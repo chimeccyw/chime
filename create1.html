@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chime — Game Creation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background-color: #f8fafc;
+      color: #111827;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    /* Top Toolbar */
+    .top-bar {
+      height: 68px;
+      padding: 0 24px;
+      background-color: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .left-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+      color: #374151;
+      background-color: #f3f4f6;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .back-btn:hover {
+      background-color: #e5e7eb;
+      color: #111827;
+    }
+
+    .game-title-input {
+      font-family: inherit;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 8px 14px;
+      width: 210px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .game-title-input:focus {
+      border-color: #2563eb;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .right-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 9px 16px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-secondary {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e5e7eb;
+      color: #111827;
+    }
+
+    .btn-primary {
+      background-color: #2563eb;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+    }
+
+    .btn-primary:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* Main Workspace Layout */
+    .workspace {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 28px;
+      padding: 24px;
+      flex-wrap: wrap;
+    }
+
+    /* Game Grid Wrapper */
+    .grid-wrapper {
+      background-color: #ffffff;
+      padding: 14px;
+      border-radius: 18px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 100%;
+      overflow: auto;
+    }
+
+    .grid-board {
+      display: grid;
+      border: 2px solid #cbd5e1;
+      background-color: #ffffff;
+      cursor: crosshair;
+      transition: background-color 0.2s ease;
+    }
+
+    .grid-cell {
+      border-right: 1px solid rgba(148, 163, 184, 0.22);
+      border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+    }
+
+    .grid-board.no-gridlines .grid-cell {
+      border-right-color: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .grid-cell:hover {
+      background-color: rgba(37, 99, 235, 0.14);
+    }
+
+    .grid-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      display: block;
+    }
+
+    .grid-hint {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: #6b7280;
+    }
+
+    /* Blocks & Tools Menu Panel */
+    .palette-panel {
+      width: 260px;
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 18px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-section-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+
+    .tool-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .tool-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+      background-color: #ffffff;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #111827;
+      text-align: left;
+      transition: border-color 0.18s ease, background-color 0.18s ease;
+    }
+
+    .tool-card:hover {
+      background-color: #f9fafb;
+    }
+
+    .tool-card.active {
+      border-color: #2563eb;
+      background-color: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .tool-card.delete-tool.active {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+      color: #b91c1c;
+    }
+
+    .tool-preview {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      background-color: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .tool-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background-color: #111827;
+      color: #ffffff;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      z-index: 400;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* Modal Overlay */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(17, 24, 39, 0.42);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.25s ease, visibility 0.25s ease;
+      z-index: 250;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-card {
+      background-color: #ffffff;
+      width: 100%;
+      max-width: 490px;
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 20px 44px rgba(0, 0, 0, 0.16);
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      font-size: 1.2rem;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      color: #6b7280;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    /* Drafts List */
+    .drafts-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .draft-item {
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background-color: #ffffff;
+      transition: border-color 0.18s ease;
+    }
+
+    .draft-item:hover {
+      border-color: #cbd5e1;
+    }
+
+    .draft-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .draft-icon-thumb {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      border: 1px solid #e5e7eb;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f5f9;
+    }
+
+    .draft-icon-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .draft-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .draft-title-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+
+    .draft-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #111827;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .draft-color-dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      flex-shrink: 0;
+    }
+
+    .draft-desc-preview {
+      font-size: 0.8rem;
+      color: #4b5563;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .draft-meta {
+      font-size: 0.74rem;
+      color: #6b7280;
+    }
+
+    .draft-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .draft-btn {
+      border: none;
+      border-radius: 8px;
+      padding: 7px 11px;
+      font-family: inherit;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.18s ease, background-color 0.18s ease;
+    }
+
+    .draft-btn:hover {
+      opacity: 0.9;
+    }
+
+    .draft-load {
+      background-color: #2563eb;
+      color: #ffffff;
+    }
+
+    .draft-settings {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+    .draft-settings:hover {
+      background-color: #e5e7eb;
+    }
+
+    .draft-delete {
+      background-color: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .empty-drafts {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.9rem;
+      padding: 28px 0;
+    }
+
+    /* Draft Settings Form */
+    .settings-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: #374151;
+    }
+
+    .form-group input[type="text"],
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      color: #111827;
+      background-color: #ffffff;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-group input[type="text"]:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 74px;
+    }
+
+    .icon-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .settings-icon-preview {
+      width: 60px;
+      height: 60px;
+      border-radius: 14px;
+      border: 2px solid #e5e7eb;
+      overflow: hidden;
+      background-color: #f8fafc;
+      flex-shrink: 0;
+    }
+
+    .settings-icon-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .icon-picker-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .gallery-picker-drawer {
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background-color: #f8fafc;
+      border: 1px solid #e5e7eb;
+      margin-top: 6px;
+    }
+
+    .gallery-picker-drawer.open {
+      display: flex;
+    }
+
+    .mini-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      max-height: 165px;
+      overflow-y: auto;
+    }
+
+    .mini-gallery-item {
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      background-color: #ffffff;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .mini-gallery-item:hover {
+      transform: scale(1.04);
+      border-color: #2563eb;
+    }
+
+    .mini-gallery-item.selected {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    }
+
+    .mini-gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .color-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .color-picker-row input[type="color"] {
+      width: 44px;
+      height: 38px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 2px;
+      background-color: #ffffff;
+      cursor: pointer;
+    }
+
+    .color-swatches {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .swatch-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #ffffff;
+      box-shadow: 0 0 0 1px #cbd5e1;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .swatch-btn:hover {
+      transform: scale(1.12);
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background-color: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+    }
+
+    .toggle-row span {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .modal-footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 8px;
+      padding-top: 12px;
+      border-top: 1px solid #f1f5f9;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Toolbar -->
+  <header class="top-bar">
+    <div class="left-controls">
+      <a href="homescreen.html" class="back-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+        Back
+      </a>
+      <input type="text" id="game-title" class="game-title-input" value="Untitled World" placeholder="Game title..." maxlength="36" />
+    </div>
+
+    <div class="right-controls">
+      <!-- Grid Size Selector -->
+      <div style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #4b5563; background: #f3f4f6; padding: 6px 12px; border-radius: 10px;">
+        <span>Grid:</span>
+        <select id="grid-size-select" style="font-family: inherit; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; outline: none; cursor: pointer; color: #111827;">
+          <option value="10">10 × 10</option>
+          <option value="12">12 × 12</option>
+          <option value="15">15 × 15</option>
+          <option value="18">18 × 18</option>
+          <option value="20" selected>20 × 20</option>
+          <option value="22">22 × 22</option>
+          <option value="25">25 × 25</option>
+        </select>
+      </div>
+
+      <button id="clear-grid-btn" class="btn btn-secondary" type="button">Clear Grid</button>
+      <button id="open-drafts-btn" class="btn btn-secondary" type="button">Drafts (<span id="draft-count">0</span>)</button>
+      <button id="save-draft-btn" class="btn btn-primary" type="button">Save Draft</button>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="workspace">
+    <!-- Game Grid -->
+    <div class="grid-wrapper">
+      <div id="grid-board" class="grid-board"></div>
+      <div class="grid-hint">Click or drag to place blocks • Right-click to erase</div>
+    </div>
+
+    <!-- Right Blocks & Tools Menu Panel -->
+    <aside class="palette-panel">
+      <div>
+        <div class="panel-section-title">Blocks</div>
+        <div class="tool-list">
+          <button type="button" class="tool-card active" data-tool="grass">
+            <div class="tool-preview">
+              <img src="grass.png" alt="Grass Block" />
+            </div>
+            <span>Grass Block</span>
+          </button>
+
+          <button type="button" class="tool-card" data-tool="dirt">
+            <div class="tool-preview">
+              <img src="dirt.png" alt="Dirt" />
+            </div>
+            <span>Dirt</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-title">Character</div>
+        <div class="tool-list">
+          <button type="button" class="tool-card" data-tool="character">
+            <div class="tool-preview">
+              <img src="character.png" alt="Character" />
+            </div>
+            <span>Character</span>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel-section-title">Tools</div>
+        <div class="tool-list">
+          <button type="button" class="tool-card delete-tool" data-tool="delete">
+            <div class="tool-preview">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+                <path d="M10 11v6"></path>
+                <path d="M14 11v6"></path>
+              </svg>
+            </div>
+            <span>Delete Block</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Drafts Modal -->
+  <div id="drafts-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Saved Drafts</h2>
+        <button id="close-drafts-btn" class="modal-close" type="button">&times;</button>
+      </div>
+      <div id="drafts-list" class="drafts-list"></div>
+    </div>
+  </div>
+
+  <!-- Draft Settings Modal -->
+  <div id="settings-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Draft Settings</h2>
+        <button id="close-settings-btn" class="modal-close" type="button">&times;</button>
+      </div>
+
+      <form id="draft-settings-form" class="settings-form">
+        <div class="form-group">
+          <label>Game Icon</label>
+          <div class="icon-picker-row">
+            <div class="settings-icon-preview">
+              <img id="settings-icon-img" src="grass.png" alt="Game Icon" />
+            </div>
+            <div class="icon-picker-actions">
+              <button type="button" id="toggle-gallery-btn" class="btn btn-secondary">Select from Gallery</button>
+              <button type="button" id="upload-icon-btn" class="btn btn-secondary">Upload New Image</button>
+              <input type="file" id="icon-upload-input" accept="image/*" style="display: none;" />
+            </div>
+          </div>
+
+          <div id="gallery-picker-drawer" class="gallery-picker-drawer">
+            <div style="font-size: 0.76rem; font-weight: 700; color: #6b7280; text-transform: uppercase;">Select Icon from Gallery</div>
+            <div id="mini-gallery-grid" class="mini-gallery-grid"></div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-name">Name</label>
+          <input type="text" id="settings-name" maxlength="36" placeholder="Enter game name..." required />
+        </div>
+
+        <div class="form-group">
+          <label for="settings-desc">Description</label>
+          <textarea id="settings-desc" maxlength="200" placeholder="Describe your game world..."></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Background Color</label>
+          <div class="color-picker-row">
+            <input type="color" id="settings-bg-color" value="#ffffff" />
+            <div class="color-swatches">
+              <button type="button" class="swatch-btn" data-color="#ffffff" style="background-color: #ffffff;" title="White"></button>
+              <button type="button" class="swatch-btn" data-color="#bae6fd" style="background-color: #bae6fd;" title="Sky Blue"></button>
+              <button type="button" class="swatch-btn" data-color="#fef08a" style="background-color: #fef08a;" title="Sunny Yellow"></button>
+              <button type="button" class="swatch-btn" data-color="#bbf7d0" style="background-color: #bbf7d0;" title="Grass Green"></button>
+              <button type="button" class="swatch-btn" data-color="#1e1b4b" style="background-color: #1e1b4b;" title="Midnight Purple"></button>
+              <button type="button" class="swatch-btn" data-color="#0f172a" style="background-color: #0f172a;" title="Deep Space Black"></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="settings-visibility">Visibility</label>
+          <select id="settings-visibility">
+            <option value="private">Private (Only Me)</option>
+            <option value="friends">Friends Only</option>
+            <option value="public">Public</option>
+          </select>
+        </div>
+
+        <div class="toggle-row">
+          <span>Show grid lines in editor</span>
+          <input type="checkbox" id="settings-gridlines" checked style="width: 18px; height: 18px; cursor: pointer;" />
+        </div>
+
+        <div class="modal-footer-actions">
+          <button type="button" id="cancel-settings-btn" class="btn btn-secondary">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">Draft saved!</div>
+
+  <script>
+    const DRAFTS_STORAGE_KEY = 'chime_game_drafts_v3';
+    const GALLERY_STORAGE_KEY = 'chime_user_gallery_v1';
+
+    const ASSETS = {
+      grass: 'grass.png',
+      dirt: 'dirt.png',
+      character: 'character.png'
+    };
+
+    let gridSize = 20;
+    let totalCells = gridSize * gridSize;
+    let selectedTool = 'grass';
+    let isDrawing = false;
+    let currentDraftId = null;
+
+    let currentSettings = {
+      description: 'No description provided.',
+      bgColor: '#ffffff',
+      icon: 'grass.png',
+      visibility: 'private',
+      showGridLines: true
+    };
+
+    let gridState = new Array(totalCells).fill(null);
+
+    const gridBoard = document.getElementById('grid-board');
+    const gridSizeSelect = document.getElementById('grid-size-select');
+    const gameTitleInput = document.getElementById('game-title');
+    const toolButtons = document.querySelectorAll('.tool-card');
+    const clearGridBtn = document.getElementById('clear-grid-btn');
+    const saveDraftBtn = document.getElementById('save-draft-btn');
+    const openDraftsBtn = document.getElementById('open-drafts-btn');
+    const closeDraftsBtn = document.getElementById('close-drafts-btn');
+    const draftsModal = document.getElementById('drafts-modal');
+    const draftsList = document.getElementById('drafts-list');
+    const draftCountEl = document.getElementById('draft-count');
+    const toastEl = document.getElementById('toast');
+
+    const settingsModal = document.getElementById('settings-modal');
+    const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const cancelSettingsBtn = document.getElementById('cancel-settings-btn');
+    const settingsForm = document.getElementById('draft-settings-form');
+    const settingsIconImg = document.getElementById('settings-icon-img');
+    const toggleGalleryBtn = document.getElementById('toggle-gallery-btn');
+    const uploadIconBtn = document.getElementById('upload-icon-btn');
+    const iconUploadInput = document.getElementById('icon-upload-input');
+    const galleryPickerDrawer = document.getElementById('gallery-picker-drawer');
+    const miniGalleryGrid = document.getElementById('mini-gallery-grid');
+    const settingsNameInput = document.getElementById('settings-name');
+    const settingsDescInput = document.getElementById('settings-desc');
+    const settingsBgColorInput = document.getElementById('settings-bg-color');
+    const settingsVisibilitySelect = document.getElementById('settings-visibility');
+    const settingsGridlinesCheckbox = document.getElementById('settings-gridlines');
+    const swatchButtons = document.querySelectorAll('.swatch-btn');
+
+    let editingDraftId = null;
+    let selectedSettingsIcon = 'grass.png';
+
+    function showToast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add('show');
+      setTimeout(() => {
+        toastEl.classList.remove('show');
+      }, 2200);
+    }
+
+    function applyWorldSettingsToBoard() {
+      gridBoard.style.backgroundColor = currentSettings.bgColor || '#ffffff';
+      if (currentSettings.showGridLines === false) {
+        gridBoard.classList.add('no-gridlines');
+      } else {
+        gridBoard.classList.remove('no-gridlines');
+      }
+    }
+
+    function initGrid() {
+      totalCells = gridSize * gridSize;
+      gridBoard.style.gridTemplateColumns = `repeat(${gridSize}, 26px)`;
+      gridBoard.style.gridTemplateRows = `repeat(${gridSize}, 26px)`;
+
+      if (gridState.length !== totalCells) {
+        const newGrid = new Array(totalCells).fill(null);
+        for (let i = 0; i < Math.min(gridState.length, totalCells); i++) {
+          newGrid[i] = gridState[i];
+        }
+        gridState = newGrid;
+      }
+
+      gridBoard.innerHTML = '';
+      for (let i = 0; i < totalCells; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'grid-cell';
+        cell.dataset.index = i;
+
+        cell.addEventListener('mousedown', (e) => {
+          e.preventDefault();
+          if (e.button === 2) {
+            applyTool(i, 'delete');
+          } else {
+            isDrawing = true;
+            applyTool(i, selectedTool);
+          }
+        });
+
+        cell.addEventListener('mouseenter', () => {
+          if (isDrawing) {
+            applyTool(i, selectedTool);
+          }
+        });
+
+        cell.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+        });
+
+        gridBoard.appendChild(cell);
+      }
+      applyWorldSettingsToBoard();
+      renderFullGrid();
+    }
+
+    gridSizeSelect.addEventListener('change', (e) => {
+      gridSize = parseInt(e.target.value, 10);
+      initGrid();
+      showToast(`Grid size changed to ${gridSize}×${gridSize}`);
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    function applyTool(index, tool) {
+      if (tool === 'delete') {
+        gridState[index] = null;
+      } else if (tool === 'character') {
+        const existingCharIndex = gridState.indexOf('character');
+        if (existingCharIndex !== -1 && existingCharIndex !== index) {
+          gridState[existingCharIndex] = null;
+          renderCell(existingCharIndex);
+        }
+        gridState[index] = 'character';
+      } else {
+        gridState[index] = tool;
+      }
+      renderCell(index);
+    }
+
+    function renderCell(index) {
+      const cell = gridBoard.children[index];
+      if (!cell) return;
+      const value = gridState[index];
+      if (!value) {
+        cell.innerHTML = '';
+      } else {
+        cell.innerHTML = `<img src="${ASSETS[value]}" alt="${value}" />`;
+      }
+    }
+
+    function renderFullGrid() {
+      for (let i = 0; i < totalCells; i++) {
+        renderCell(i);
+      }
+    }
+
+    toolButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        toolButtons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedTool = btn.dataset.tool;
+      });
+    });
+
+    clearGridBtn.addEventListener('click', () => {
+      gridState.fill(null);
+      renderFullGrid();
+      showToast('Grid cleared');
+    });
+
+    function getAvailableGalleryImages() {
+      const defaultGameIcons = ['grass.png', 'dirt.png', 'character.png', 'pfpu.png'];
+      let storedGallery = [];
+      try {
+        storedGallery = JSON.parse(localStorage.getItem(GALLERY_STORAGE_KEY)) || [];
+      } catch (e) {
+        storedGallery = [];
+      }
+      const combined = [...defaultGameIcons];
+      storedGallery.forEach((item) => {
+        if (!combined.includes(item)) {
+          combined.push(item);
+        }
+      });
+      return combined;
+    }
+
+    function addToUserGallery(dataUrl) {
+      let storedGallery = [];
+      try {
+        storedGallery = JSON.parse(localStorage.getItem(GALLERY_STORAGE_KEY)) || ['pfpu.png'];
+      } catch (e) {
+        storedGallery = ['pfpu.png'];
+      }
+      if (!storedGallery.includes(dataUrl)) {
+        storedGallery.unshift(dataUrl);
+        localStorage.setItem(GALLERY_STORAGE_KEY, JSON.stringify(storedGallery));
+      }
+    }
+
+    function getDrafts() {
+      try {
+        return JSON.parse(localStorage.getItem(DRAFTS_STORAGE_KEY)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveDrafts(drafts) {
+      localStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify(drafts));
+      updateDraftCount();
+    }
+
+    function updateDraftCount() {
+      draftCountEl.textContent = getDrafts().length;
+    }
+
+    saveDraftBtn.addEventListener('click', () => {
+      const drafts = getDrafts();
+      const title = gameTitleInput.value.trim() || 'Untitled World';
+      const now = new Date().toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const draftPayload = {
+        title,
+        gridSize,
+        description: currentSettings.description,
+        bgColor: currentSettings.bgColor,
+        icon: currentSettings.icon,
+        visibility: currentSettings.visibility,
+        showGridLines: currentSettings.showGridLines,
+        grid: [...gridState],
+        updatedAt: now
+      };
+
+      if (currentDraftId) {
+        const idx = drafts.findIndex((d) => d.id === currentDraftId);
+        if (idx !== -1) {
+          drafts[idx] = { ...drafts[idx], ...draftPayload };
+        } else {
+          currentDraftId = Date.now().toString();
+          drafts.unshift({ id: currentDraftId, ...draftPayload });
+        }
+      } else {
+        currentDraftId = Date.now().toString();
+        drafts.unshift({ id: currentDraftId, ...draftPayload });
+      }
+
+      saveDrafts(drafts);
+      showToast(`Saved "${title}" to drafts`);
+    });
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderDraftsModal() {
+      const drafts = getDrafts();
+      draftsList.innerHTML = '';
+
+      if (drafts.length === 0) {
+        draftsList.innerHTML = '<div class="empty-drafts">No saved drafts yet.</div>';
+        return;
+      }
+
+      drafts.forEach((draft) => {
+        const item = document.createElement('div');
+        item.className = 'draft-item';
+
+        const iconSrc = draft.icon || 'grass.png';
+        const bgColor = draft.bgColor || '#ffffff';
+        const descText = draft.description || 'No description provided.';
+        const visMap = { private: 'Private', friends: 'Friends Only', public: 'Public' };
+        const visLabel = visMap[draft.visibility] || 'Private';
+
+        item.innerHTML = `
+          <div class="draft-left">
+            <div class="draft-icon-thumb" style="background-color: ${escapeHtml(bgColor)};">
+              <img src="${escapeHtml(iconSrc)}" alt="Draft Icon" />
+            </div>
+            <div class="draft-info">
+              <div class="draft-title-row">
+                <h4>${escapeHtml(draft.title)}</h4>
+                <span class="draft-color-dot" style="background-color: ${escapeHtml(bgColor)};" title="Background color: ${escapeHtml(bgColor)}"></span>
+              </div>
+              <div class="draft-desc-preview">${escapeHtml(descText)}</div>
+              <div class="draft-meta">${visLabel} • Grid ${draft.gridSize || 20}×${draft.gridSize || 20} • Saved at ${escapeHtml(draft.updatedAt)}</div>
+            </div>
+          </div>
+          <div class="draft-actions">
+            <button type="button" class="draft-btn draft-load">Load</button>
+            <button type="button" class="draft-btn draft-settings" title="Edit draft settings">Settings</button>
+            <button type="button" class="draft-btn draft-delete" title="Delete draft">Delete</button>
+          </div>
+        `;
+
+        item.querySelector('.draft-load').addEventListener('click', () => {
+          currentDraftId = draft.id;
+          gameTitleInput.value = draft.title;
+          gridSize = draft.gridSize || 20;
+          gridSizeSelect.value = gridSize.toString();
+          gridState = [...draft.grid];
+          currentSettings = {
+            description: draft.description || 'No description provided.',
+            bgColor: draft.bgColor || '#ffffff',
+            icon: draft.icon || 'grass.png',
+            visibility: draft.visibility || 'private',
+            showGridLines: draft.showGridLines !== false
+          };
+          initGrid();
+          draftsModal.classList.remove('open');
+          showToast(`Loaded "${draft.title}"`);
+        });
+
+        item.querySelector('.draft-settings').addEventListener('click', () => {
+          openDraftSettingsModal(draft.id);
+        });
+
+        item.querySelector('.draft-delete').addEventListener('click', () => {
+          const updated = getDrafts().filter((d) => d.id !== draft.id);
+          if (currentDraftId === draft.id) {
+            currentDraftId = null;
+          }
+          saveDrafts(updated);
+          renderDraftsModal();
+          showToast('Draft deleted');
+        });
+
+        draftsList.appendChild(item);
+      });
+    }
+
+    function renderMiniGallery() {
+      const images = getAvailableGalleryImages();
+      miniGalleryGrid.innerHTML = '';
+
+      images.forEach((src) => {
+        const thumb = document.createElement('div');
+        thumb.className = 'mini-gallery-item' + (src === selectedSettingsIcon ? ' selected' : '');
+        thumb.innerHTML = `<img src="${src}" alt="Gallery Icon" />`;
+        thumb.addEventListener('click', () => {
+          selectedSettingsIcon = src;
+          settingsIconImg.src = src;
+          renderMiniGallery();
+        });
+        miniGalleryGrid.appendChild(thumb);
+      });
+    }
+
+    function openDraftSettingsModal(draftId) {
+      const drafts = getDrafts();
+      const draft = drafts.find((d) => d.id === draftId);
+      if (!draft) return;
+
+      editingDraftId = draftId;
+      selectedSettingsIcon = draft.icon || 'grass.png';
+
+      settingsIconImg.src = selectedSettingsIcon;
+      settingsNameInput.value = draft.title || 'Untitled World';
+      settingsDescInput.value = draft.description || '';
+      settingsBgColorInput.value = draft.bgColor || '#ffffff';
+      settingsVisibilitySelect.value = draft.visibility || 'private';
+      settingsGridlinesCheckbox.checked = draft.showGridLines !== false;
+
+      galleryPickerDrawer.classList.remove('open');
+      renderMiniGallery();
+      settingsModal.classList.add('open');
+    }
+
+    toggleGalleryBtn.addEventListener('click', () => {
+      galleryPickerDrawer.classList.toggle('open');
+      if (galleryPickerDrawer.classList.contains('open')) {
+        renderMiniGallery();
+      }
+    });
+
+    uploadIconBtn.addEventListener('click', () => {
+      iconUploadInput.click();
+    });
+
+    iconUploadInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target.result;
+        addToUserGallery(dataUrl);
+        selectedSettingsIcon = dataUrl;
+        settingsIconImg.src = dataUrl;
+        galleryPickerDrawer.classList.add('open');
+        renderMiniGallery();
+      };
+      reader.readAsDataURL(file);
+      iconUploadInput.value = '';
+    });
+
+    swatchButtons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        settingsBgColorInput.value = btn.dataset.color;
+      });
+    });
+
+    settingsForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!editingDraftId) return;
+
+      const drafts = getDrafts();
+      const idx = drafts.findIndex((d) => d.id === editingDraftId);
+      if (idx === -1) return;
+
+      const updatedTitle = settingsNameInput.value.trim() || 'Untitled World';
+      const updatedDesc = settingsDescInput.value.trim() || 'No description provided.';
+      const updatedBgColor = settingsBgColorInput.value;
+      const updatedVisibility = settingsVisibilitySelect.value;
+      const updatedGridLines = settingsGridlinesCheckbox.checked;
+
+      drafts[idx].title = updatedTitle;
+      drafts[idx].description = updatedDesc;
+      drafts[idx].bgColor = updatedBgColor;
+      drafts[idx].icon = selectedSettingsIcon;
+      drafts[idx].visibility = updatedVisibility;
+      drafts[idx].showGridLines = updatedGridLines;
+
+      saveDrafts(drafts);
+
+      if (currentDraftId === editingDraftId) {
+        gameTitleInput.value = updatedTitle;
+        currentSettings = {
+          description: updatedDesc,
+          bgColor: updatedBgColor,
+          icon: selectedSettingsIcon,
+          visibility: updatedVisibility,
+          showGridLines: updatedGridLines
+        };
+        applyWorldSettingsToBoard();
+      }
+
+      settingsModal.classList.remove('open');
+      renderDraftsModal();
+      showToast('Draft settings saved');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('open');
+    });
+
+    cancelSettingsBtn.addEventListener('click', () => {
+      settingsModal.classList.remove('open');
+    });
+
+    settingsModal.addEventListener('click', (e) => {
+      if (e.target === settingsModal) {
+        settingsModal.classList.remove('open');
+      }
+    });
+
+    openDraftsBtn.addEventListener('click', () => {
+      renderDraftsModal();
+      draftsModal.classList.add('open');
+    });
+
+    closeDraftsBtn.addEventListener('click', () => {
+      draftsModal.classList.remove('open');
+    });
+
+    draftsModal.addEventListener('click', (e) => {
+      if (e.target === draftsModal) {
+        draftsModal.classList.remove('open');
+      }
+    });
+
+    // Initialize
+    initGrid();
+    updateDraftCount();
+  </script>
+</body>
+</html>
+

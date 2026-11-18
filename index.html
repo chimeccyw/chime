@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chime — Create your World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #ffffff;
+      color: #111827;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Full-Screen Views */
+    .screen {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      padding: 48px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(16px);
+      transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.45s;
+      background-color: #ffffff;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+
+    /* 1. Full-Screen Landing Layout: Logo at Top, Button at Bottom */
+    #landing-screen {
+      justify-content: space-between;
+      text-align: center;
+      background: radial-gradient(circle at top center, #f8fafc 0%, #ffffff 60%);
+    }
+
+    .top-brand-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .brand-logo-wrapper {
+      width: 84px;
+      height: 84px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+      margin-bottom: 18px;
+      animation: floatLogo 4s ease-in-out infinite;
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+
+    .brand-logo {
+      width: 46px;
+      height: 46px;
+      object-fit: contain;
+    }
+
+    .brand-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .brand-tagline {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #6b7280;
+    }
+
+    .bottom-action-area {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 24px;
+    }
+
+    /* Buttons */
+    .btn-green {
+      width: 100%;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: #ffffff;
+      border: none;
+      border-radius: 16px;
+      padding: 16px 32px;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 20px -4px rgba(16, 185, 129, 0.35);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-green:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px -4px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-green:active {
+      transform: translateY(0);
+      box-shadow: 0 6px 12px -2px rgba(16, 185, 129, 0.3);
+    }
+
+    /* 2. Full-Screen Login Form (No Card Box) */
+    #form-screen {
+      justify-content: center;
+    }
+
+    .form-container {
+      width: 100%;
+      max-width: 400px;
+      text-align: left;
+    }
+
+    .form-header {
+      margin-bottom: 32px;
+      text-align: center;
+    }
+
+    .form-header h2 {
+      font-size: 1.85rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .form-header p {
+      font-size: 0.98rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #4b5563;
+      margin-bottom: 8px;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: #111827;
+      background: #f9fafb;
+      outline: none;
+      transition: all 0.2s ease;
+    }
+
+    .input-group input:focus {
+      background: #ffffff;
+      border-color: #10b981;
+      box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.12);
+    }
+
+    .btn-submit {
+      margin-top: 12px;
+    }
+
+    /* 3. Full-Screen Loading View (No Card Box) */
+    #loading-screen {
+      justify-content: center;
+      text-align: center;
+    }
+
+    .loading-container {
+      width: 100%;
+      max-width: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .loader-ring {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      margin-bottom: 26px;
+    }
+
+    .spinner {
+      position: absolute;
+      inset: 0;
+      border: 4px solid #f1f5f9;
+      border-top-color: #10b981;
+      border-radius: 50%;
+      animation: spin 0.9s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+    }
+
+    .spinner-inner {
+      position: absolute;
+      inset: 7px;
+      border: 3px solid transparent;
+      border-bottom-color: #059669;
+      border-radius: 50%;
+      animation: spinReverse 1.2s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes spinReverse {
+      to { transform: rotate(-360deg); }
+    }
+
+    .loading-text {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #111827;
+      margin-bottom: 6px;
+    }
+
+    .loading-sub {
+      font-size: 0.95rem;
+      color: #6b7280;
+      font-weight: 500;
+    }
+
+    .loading-progress-bar {
+      width: 100%;
+      height: 7px;
+      background: #f1f5f9;
+      border-radius: 999px;
+      margin-top: 28px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loading-progress-fill {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #059669);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 4.8s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Step 1: Full-Screen Landing (Logo at Top, Get Started at Bottom) -->
+  <section id="landing-screen" class="screen active">
+    <div class="top-brand-area">
+      <div class="brand-logo-wrapper">
+        <img src="logo.png" alt="Chime Logo" class="brand-logo" />
+      </div>
+      <div class="brand-title">Chime</div>
+      <div class="brand-tagline">Create your World</div>
+    </div>
+
+    <div class="bottom-action-area">
+      <button id="start-login-btn" class="btn-green">Get Started</button>
+    </div>
+  </section>
+
+  <!-- Step 2: Full-Screen Account Input -->
+  <section id="form-screen" class="screen">
+    <div class="form-container">
+      <div class="form-header">
+        <h2>Welcome to Chime</h2>
+        <p>Enter your details to generate your workspace.</p>
+      </div>
+      <form id="login-form">
+        <div class="input-group">
+          <label for="name">Name</label>
+          <input type="text" id="name" placeholder="Enter your name" required />
+        </div>
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required />
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="••••••••" required />
+        </div>
+        <button type="submit" class="btn-green btn-submit">Continue to Studio</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Step 3: Full-Screen Loading -->
+  <section id="loading-screen" class="screen">
+    <div class="loading-container">
+      <div class="loader-ring">
+        <div class="spinner"></div>
+        <div class="spinner-inner"></div>
+      </div>
+      <div id="loading-status-text" class="loading-text">Initializing world canvas...</div>
+      <div id="loading-sub-text" class="loading-sub">Connecting secure session</div>
+      <div class="loading-progress-bar">
+        <div id="progress-fill" class="loading-progress-fill"></div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const landingScreen = document.getElementById('landing-screen');
+    const formScreen = document.getElementById('form-screen');
+    const loadingScreen = document.getElementById('loading-screen');
+
+    const startLoginBtn = document.getElementById('start-login-btn');
+    const loginForm = document.getElementById('login-form');
+    const statusText = document.getElementById('loading-status-text');
+    const subText = document.getElementById('loading-sub-text');
+    const progressFill = document.getElementById('progress-fill');
+
+    // Switch from Landing screen to Full-Screen Login
+    startLoginBtn.addEventListener('click', () => {
+      landingScreen.classList.remove('active');
+      setTimeout(() => {
+        formScreen.classList.add('active');
+      }, 250);
+    });
+
+    // Switch from Login screen to Full-Screen Loading
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      formScreen.classList.remove('active');
+      setTimeout(() => {
+        loadingScreen.classList.add('active');
+        setTimeout(() => {
+          progressFill.style.width = '100%';
+        }, 50);
+      }, 250);
+
+      setTimeout(() => {
+        statusText.textContent = 'Generating assets...';
+        subText.textContent = 'Setting up custom environment';
+      }, 1600);
+
+      setTimeout(() => {
+        statusText.textContent = 'Entering your world...';
+        subText.textContent = 'Almost ready';
+      }, 3400);
+
+      setTimeout(() => {
+        window.location.href = 'homescreen.html';
+      }, 5000);
+    });
+  </script>
+
+</body>
+</html>
+
